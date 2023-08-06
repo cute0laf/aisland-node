@@ -2,6 +2,8 @@
 members = [
     "node",
     "pallets/marketplace",
+    "pallets/docsig",
+    "pallets/citizenship",
     "runtime",
 ]
 [profile.release]

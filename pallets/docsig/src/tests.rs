@@ -2,7 +2,7 @@ use crate::{mock::*, Error, Event};
 use frame_support::{assert_noop, assert_ok};
 
 #[test]
-fn it_works_for_default_value() {
+/*fn it_works_for_default_value() {
 	new_test_ext().execute_with(|| {
 		// Go past genesis block so events get deposited
 		System::set_block_number(1);
@@ -13,15 +13,20 @@ fn it_works_for_default_value() {
 		// Assert that the correct event was deposited
 		System::assert_last_event(Event::SomethingStored { something: 42, who: 1 }.into());
 	});
-}
-
+}*/
 #[test]
-fn correct_error_for_none_value() {
-	new_test_ext().execute_with(|| {
-		// Ensure the expected error is thrown when no value is present.
-		assert_noop!(
-			TemplateModule::cause_error(RuntimeOrigin::signed(1)),
-			Error::<Test>::NoneValue
-		);
+fn store_new_passport(){
+	new_test_ext().execute_with(||{
+		// Go past genesis block so events get deposited
+		System::set_block_number(1);
+		let id:u32 = 1u32.into();
+		let mut document = Vec::<u8>::new();
+		document.push(b'A');
+		document.push(b'B');
+		// Dispatch the signed extrinsic.
+		RuntimeOrigin::signed(1);
+		//assert_ok!(docsig::new_document(RuntimeOrigin::signed(1), id,document));
+		//assert_eq!(Something::<T>::get(), Some(value));
 	});
+
 }

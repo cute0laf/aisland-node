@@ -1,4 +1,4 @@
-//! Benchmarking setup for pallet-template
+//! Benchmarking setup for pallet-citizenship
 #![cfg(feature = "runtime-benchmarks")]
 use super::*;
 
@@ -12,23 +12,16 @@ mod benchmarks {
 	use super::*;
 
 	#[benchmark]
-	fn do_something() {
-		let value = 100u32.into();
+	fn new_passport() {
+		let id:u32 = 1u32.into();
 		let caller: T::AccountId = whitelisted_caller();
+		let mut passport = Vec::<u8>::new();
+		passport.push(b'A');
+		passport.push(b'B');
 		#[extrinsic_call]
-		do_something(RawOrigin::Signed(caller), value);
+		new_passport(RawOrigin::Signed(caller.clone()),caller.clone(),id,passport);
 
-		assert_eq!(Something::<T>::get(), Some(value));
-	}
-
-	#[benchmark]
-	fn cause_error() {
-		Something::<T>::put(100u32);
-		let caller: T::AccountId = whitelisted_caller();
-		#[extrinsic_call]
-		cause_error(RawOrigin::Signed(caller));
-
-		assert_eq!(Something::<T>::get(), Some(101u32));
+		//assert_eq!(Something::<T>::get(), Some(value));
 	}
 
 	impl_benchmark_test_suite!(Template, crate::mock::new_test_ext(), crate::mock::Test);

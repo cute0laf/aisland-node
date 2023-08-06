@@ -112,85 +112,85 @@ pub mod pallet {
 		
 		  /// Create a new document to be signed
 		  #[pallet::call_index(1)]
-		  #[pallet::weight(T::WeightInfo::cause_error())]
+		  #[pallet::weight(T::WeightInfo::new_document())]
 		  pub fn new_document(origin:OriginFor<T>, id: u32,document: Vec<u8>) -> DispatchResult {
-			  // check the request is signed
-			  let sender = ensure_signed(origin)?;
-			  //check document length
-		          ensure!(document.len() >= 32, Error::<T>::DocumentTooShort);
-		          ensure!(document.len() <= 128, Error::<T>::DocumentTooLong);
-		          ensure!(id>0,Error::<T>::IdCannotBeZero);
-		          ensure!(!Documents::<T>::contains_key(&sender,&id),Error::<T>::DocumentAlreadyPresent);
-			  // Insert new Document
-			  Documents::<T>::insert(sender.clone(),id.clone(),document.clone());
-			  // Generate event
-			  Self::deposit_event(Event::DocumentCreated(sender,id,document));
-			  // Return a successful DispatchResult
-			  Ok(())
+				// check the request is signed
+				let sender = ensure_signed(origin)?;
+				//check document length
+				ensure!(document.len() >= 32, Error::<T>::DocumentTooShort);
+				ensure!(document.len() <= 128, Error::<T>::DocumentTooLong);
+				ensure!(id>0,Error::<T>::IdCannotBeZero);
+				ensure!(!Documents::<T>::contains_key(&sender,&id),Error::<T>::DocumentAlreadyPresent);
+				// Insert new Document
+				Documents::<T>::insert(sender.clone(),id.clone(),document.clone());
+				// Generate event
+				Self::deposit_event(Event::DocumentCreated(sender,id,document));
+				// Return a successful DispatchResult
+				Ok(())
 		  }
 		  /// Destroy a Document
 		  #[pallet::call_index(2)]
-		  #[pallet::weight(T::WeightInfo::cause_error())]
+		  #[pallet::weight(T::WeightInfo::destroy_document())]
 		  pub fn destroy_document(origin:OriginFor<T>,id:u32) -> DispatchResult {
-			  // check the request is signed
-			  let sender = ensure_signed(origin)?;
-			  // verify the document exists
-			  ensure!(Documents::<T>::contains_key(&sender,&id)==true, Error::<T>::DocumentNotFound);
-			  // Remove Document 
-			  Documents::<T>::take(sender.clone(),id.clone());
-			  // Generate event
-			  //it can leave orphans, anyway it's a decision of the super user
-			  Self::deposit_event(Event::DocumentDestroyed(sender,id));
-			  // Return a successful DispatchResult
-			  Ok(())
+				// check the request is signed
+				let sender = ensure_signed(origin)?;
+				// verify the document exists
+				ensure!(Documents::<T>::contains_key(&sender,&id)==true, Error::<T>::DocumentNotFound);
+				// Remove Document 
+				Documents::<T>::take(sender.clone(),id.clone());
+				// Generate event
+				//it can leave orphans, anyway it's a decision of the super user
+				Self::deposit_event(Event::DocumentDestroyed(sender,id));
+				// Return a successful DispatchResult
+				Ok(())
 		  }
           #[pallet::call_index(3)]
-		  #[pallet::weight(T::WeightInfo::cause_error())]
+		  #[pallet::weight(T::WeightInfo::sign_document())]
 		  pub fn sign_document(origin:OriginFor<T>, id: u32,hash: Vec<u8>) -> DispatchResult {
-			  // check the request is signed
-			  let sender = ensure_signed(origin)?;
-			  //check  hash length
-		          ensure!(hash.len() < 128, Error::<T>::HashTooLong);
-	                  ensure!(hash.len() > 2, Error::<T>::HashTooShort);
-		          ensure!(id>0,Error::<T>::IdCannotBeZero);
-	                  ensure!(!Signatures::<T>::contains_key(&sender,&id),Error::<T>::DocumentAlreadySigned);
-			  // Insert Signature
-			  Signatures::<T>::insert(sender.clone(),id.clone(),hash.clone());
-			  // Generate event
-			  Self::deposit_event(Event::DocumentSigned(sender,id,hash));
-			  // Return a successful DispatchResult
-			  Ok(())
+				// check the request is signed
+				let sender = ensure_signed(origin)?;
+				//check  hash length
+				ensure!(hash.len() < 128, Error::<T>::HashTooLong);
+				ensure!(hash.len() > 2, Error::<T>::HashTooShort);
+				ensure!(id>0,Error::<T>::IdCannotBeZero);
+				ensure!(!Signatures::<T>::contains_key(&sender,&id),Error::<T>::DocumentAlreadySigned);
+				// Insert Signature
+				Signatures::<T>::insert(sender.clone(),id.clone(),hash.clone());
+				// Generate event
+				Self::deposit_event(Event::DocumentSigned(sender,id,hash));
+				// Return a successful DispatchResult
+				Ok(())
 		  }
 		  /// Store a BLOB (binary large object) eventually in multiple chunks of 100K bytes
 		  /// the first chunk start from 0 and should increase by 1.
 		  #[pallet::call_index(4)]
-		  #[pallet::weight(T::WeightInfo::cause_error())]
+		  #[pallet::weight(T::WeightInfo::new_blob())]
 		  pub fn new_blob(origin:OriginFor<T>, account: T::AccountId,id: u32,chunkid: u32,blob: Vec<u8>) -> DispatchResult {
-			  // check the request is signed
-			  let _sender = ensure_signed(origin)?;
-			  //check blob length
-              ensure!(blob.len() < 1, Error::<T>::BlobTooShort);
-			  //the underlying rocksdb has a limit of 3 GB for the value 
-			  // the standard max block size in substrate is 4.5 MB, the max for parachain is 2 MB.
-			  // 100K should be a reasonable amount for single blob chunk
-			  ensure!(blob.len() > 100000, Error::<T>::BlobTooLong); 
-			  // check id that cannot be <1
-              ensure!(id>0,Error::<T>::IdCannotBeZero);
-			  // build the tuple to query the nmap
-			  let keyarg=&(account.clone(),id.clone(),chunkid.clone());
-			  //check that the same blob is not already stored
-              ensure!(!Blobs::<T>::contains_key(keyarg.clone()),Error::<T>::BlobAlreadyPresent);
-			  // Insert the new BLOB chunk (it may be the only one if the file is smaller than 100K)
-			  Blobs::<T>::insert(keyarg,blob);
-			  // Generate event for the new Blob
-			  Self::deposit_event(Event::NewBlobCreated(account,id,chunkid));
-			  // Return a successful DispatchResult
-			  Ok(())
+				// check the request is signed
+				let _sender = ensure_signed(origin)?;
+				//check blob length
+				ensure!(blob.len() > 1, Error::<T>::BlobTooShort);
+				//the underlying rocksdb has a limit of 3 GB for the value 
+				// the standard max block size in substrate is 4.5 MB, the max for parachain is 2 MB.
+				// 100K should be a reasonable amount for single blob chunk
+				ensure!(blob.len() <= 100000, Error::<T>::BlobTooLong); 
+				// check id that cannot be <1
+				ensure!(id>0,Error::<T>::IdCannotBeZero);
+				// build the tuple to query the nmap
+				let keyarg=&(account.clone(),id.clone(),chunkid.clone());
+				//check that the same blob is not already stored
+				ensure!(!Blobs::<T>::contains_key(keyarg.clone()),Error::<T>::BlobAlreadyPresent);
+				// Insert the new BLOB chunk (it may be the only one if the file is smaller than 100K)
+				Blobs::<T>::insert(keyarg,blob);
+				// Generate event for the new Blob
+				Self::deposit_event(Event::NewBlobCreated(account,id,chunkid));
+				// Return a successful DispatchResult
+				Ok(())
 		  }
 		  
-		  /// Destroy a Blob 
+		  /// Destroy a Blob, only the orginal creator can remove it and upon condition is not yet signed
 		  #[pallet::call_index(5)]
-		  #[pallet::weight(T::WeightInfo::cause_error())]
+		  #[pallet::weight(T::WeightInfo::destroy_blob())]
 		  pub fn destroy_blob(origin:OriginFor<T>,account: T::AccountId,id:u32,chunkid:u32) -> DispatchResult {
 			  // check the request is signed
 			  let sender = ensure_signed(origin)?;
@@ -213,3 +213,8 @@ pub mod pallet {
 	
 }
 
+/*
+https://substrate-developer-hub.github.io/substrate-how-to-guides/docs/basics/basic-tx-weight-calculations/
+
+https://github.com/substrate-developer-hub/substrate-node-template/blob/main/pallets/template/src/weights.rs
+*/

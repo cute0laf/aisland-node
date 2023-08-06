@@ -101,6 +101,7 @@ runtime-benchmarks = [
 	"pallet-grandpa/runtime-benchmarks",
 	"pallet-timestamp/runtime-benchmarks",
 	"sp-runtime/runtime-benchmarks",
+	"pallet-docsig/runtime-benchmarks",
 ]
 try-runtime = [
 	"frame-try-runtime/try-runtime",

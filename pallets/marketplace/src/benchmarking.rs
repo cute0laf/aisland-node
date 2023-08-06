@@ -1,9 +1,9 @@
-//! Benchmarking setup for pallet-template
+//! Benchmarking setup for pallet-marketplace
 #![cfg(feature = "runtime-benchmarks")]
 use super::*;
 
 #[allow(unused)]
-use crate::Pallet as Template;
+use crate::Pallet as Marketplace;
 use frame_benchmarking::v2::*;
 use frame_system::RawOrigin;
 
@@ -12,24 +12,23 @@ mod benchmarks {
 	use super::*;
 
 	#[benchmark]
-	fn do_something() {
-		let value = 100u32.into();
+	fn create_iso_country() {
 		let caller: T::AccountId = whitelisted_caller();
+		let mut countrycode = Vec::<u8>::new();
+		countrycode.push(b'A');
+		countrycode.push(b'I');
+		let mut countryname = Vec::<u8>::new();
+		countryname.push(b'A');
+		countryname.push(b'i');
+		countryname.push(b's');
+		countryname.push(b'l');
+		countryname.push(b'a');
+		countryname.push(b'n');
+		countryname.push(b'd');
 		#[extrinsic_call]
-		do_something(RawOrigin::Signed(caller), value);
-
-		assert_eq!(Something::<T>::get(), Some(value));
+		create_iso_country(RawOrigin::Signed(caller), countrycode.clone(),countryname.clone());
+		//assert_eq!(create_iso_country::<T>::get(), Some(countryname));
 	}
 
-	#[benchmark]
-	fn cause_error() {
-		Something::<T>::put(100u32);
-		let caller: T::AccountId = whitelisted_caller();
-		#[extrinsic_call]
-		cause_error(RawOrigin::Signed(caller));
-
-		assert_eq!(Something::<T>::get(), Some(101u32));
-	}
-
-	impl_benchmark_test_suite!(Template, crate::mock::new_test_ext(), crate::mock::Test);
+	impl_benchmark_test_suite!(Marketplace, crate::mock::new_test_ext(), crate::mock::Test);
 }
