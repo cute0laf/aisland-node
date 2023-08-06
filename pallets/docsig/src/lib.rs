@@ -42,15 +42,29 @@ pub mod pallet {
 	}
 
 	// we use a safe crypto hashing by blake2_128
-	// Document data storage
+	// Document data hash storage
 	#[pallet::storage]
 	#[pallet::getter(fn get_document)]
 	pub(super) type Documents<T: Config> = StorageDoubleMap< _,Blake2_128Concat, T::AccountId,Blake2_128Concat, u32,Vec<u8>,ValueQuery>;
 
+	// signature storage
     #[pallet::storage]
     #[pallet::getter(fn get_signature)]
 	pub(super) type Signatures<T: Config> = StorageDoubleMap< _,Blake2_128Concat, T::AccountId,Blake2_128Concat, u32,Vec<u8>,ValueQuery>;
 
+    // Blob (binary large objects) data is a multiple keys storage
+	#[pallet::storage]
+	#[pallet::getter(fn get_blob)]
+	pub(super) type Blobs<T: Config> = StorageNMap<
+    	_,
+    	(
+			NMapKey<Blake2_128Concat, T::AccountId>,
+        	NMapKey<Blake2_128Concat, u32>,
+        	NMapKey<Blake2_128Concat, u32>,
+    	),
+    	Vec<u8>,
+    	ValueQuery,
+	>;
 	// Events definitions
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -59,6 +73,8 @@ pub mod pallet {
 		DocumentCreated(T::AccountId, u32,Vec<u8>),       // New document has been created
         DocumentDestroyed(T::AccountId,u32),              // Document destroyed
         DocumentSigned(T::AccountId,u32,Vec<u8>),         // Document signed
+		NewBlobCreated(T::AccountId,u32,u32),             // new BLOB created
+		BlobDestroyed(T::AccountId,u32,u32),             //  A BLOB has been destroyed
 	}
 
 	// Errors inform users that something went wrong.
@@ -80,6 +96,14 @@ pub mod pallet {
         HashTooShort,
         ///  hash is too long
         HashTooLong,
+		/// the data in the blob is too short it must be > 1
+		BlobTooShort,
+		/// the data in the blob cannot be more than 100K bytes, you should create multiple chunks for bigger blob
+		BlobTooLong,
+		/// the blob is already stored, you may need to increase the chunk id for additional data
+		BlobAlreadyPresent,
+		/// The blob is not present on chain
+		BlobNotFound,
 	}
 
 	// Dispatchable functions allows users to interact with the pallet and invoke state changes.
@@ -137,6 +161,53 @@ pub mod pallet {
 			  // Return a successful DispatchResult
 			  Ok(())
 		  }
+		  /// Store a BLOB (binary large object) eventually in multiple chunks of 100K bytes
+		  /// the first chunk start from 0 and should increase by 1.
+		  #[pallet::call_index(4)]
+		  #[pallet::weight(T::WeightInfo::cause_error())]
+		  pub fn new_blob(origin:OriginFor<T>, account: T::AccountId,id: u32,chunkid: u32,blob: Vec<u8>) -> DispatchResult {
+			  // check the request is signed
+			  let _sender = ensure_signed(origin)?;
+			  //check blob length
+              ensure!(blob.len() < 1, Error::<T>::BlobTooShort);
+			  //the underlying rocksdb has a limit of 3 GB for the value 
+			  // the standard max block size in substrate is 4.5 MB, the max for parachain is 2 MB.
+			  // 100K should be a reasonable amount for single blob chunk
+			  ensure!(blob.len() > 100000, Error::<T>::BlobTooLong); 
+			  // check id that cannot be <1
+              ensure!(id>0,Error::<T>::IdCannotBeZero);
+			  // build the tuple to query the nmap
+			  let keyarg=&(account.clone(),id.clone(),chunkid.clone());
+			  //check that the same blob is not already stored
+              ensure!(!Blobs::<T>::contains_key(keyarg.clone()),Error::<T>::BlobAlreadyPresent);
+			  // Insert the new BLOB chunk (it may be the only one if the file is smaller than 100K)
+			  Blobs::<T>::insert(keyarg,blob);
+			  // Generate event for the new Blob
+			  Self::deposit_event(Event::NewBlobCreated(account,id,chunkid));
+			  // Return a successful DispatchResult
+			  Ok(())
+		  }
+		  
+		  /// Destroy a Blob 
+		  #[pallet::call_index(5)]
+		  #[pallet::weight(T::WeightInfo::cause_error())]
+		  pub fn destroy_blob(origin:OriginFor<T>,account: T::AccountId,id:u32,chunkid:u32) -> DispatchResult {
+			  // check the request is signed
+			  let sender = ensure_signed(origin)?;
+			  //check that the matching document is not yet signed
+			  ensure!(!Signatures::<T>::contains_key(&sender,&id),Error::<T>::DocumentAlreadySigned);
+			  // build the tuple to query the nmap
+			  let keyarg=&(sender.clone(),id.clone(),chunkid.clone());
+			  // verify the blob exists and belong to the signer
+			  ensure!(Blobs::<T>::contains_key(keyarg.clone()),Error::<T>::BlobNotFound);
+			  // Remove the blob
+			  Blobs::<T>::take(keyarg);
+			  // Generate event
+			  Self::deposit_event(Event::BlobDestroyed(account,id,chunkid));
+			  // Return a successful DispatchResult
+			  Ok(())
+		  }
+		  
 
 	}
 	
