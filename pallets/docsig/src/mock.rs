@@ -1,11 +1,12 @@
-use crate as pallet_template;
+use crate as pallet_docsig;
 use frame_support::traits::{ConstU16, ConstU64};
 use sp_core::H256;
 use sp_runtime::{
 	testing::Header,
 	traits::{BlakeTwo256, IdentityLookup},
 };
-
+use frame_system as system;
+//use frame_system::weights;
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
@@ -17,7 +18,7 @@ frame_support::construct_runtime!(
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
 		System: frame_system,
-		TemplateModule: pallet_template,
+		DocSig: pallet_docsig,
 	}
 );
 
@@ -48,12 +49,21 @@ impl frame_system::Config for Test {
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 
-impl pallet_template::Config for Test {
+impl pallet_docsig::Config for Test {
 	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = ();
 }
 
-// Build genesis storage according to the mock runtime.
+// Build genesis storage according to the mock runtime starting from block(1)
 pub fn new_test_ext() -> sp_io::TestExternalities {
-	frame_system::GenesisConfig::default().build_storage::<Test>().unwrap().into()
+	// need to set block number to 1 to test events
+	let t = system::GenesisConfig::default().build_storage::<Test>().unwrap();
+	let mut ext: sp_io::TestExternalities = t.into();
+	ext.execute_with(|| System::set_block_number(1));
+	ext
+	//frame_system::GenesisConfig::default().build_storage::<Test>().unwrap().into()
+}
+
+pub fn last_event() -> RuntimeEvent {
+	System::events().pop().expect("Event expected").event
 }

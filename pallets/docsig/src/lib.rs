@@ -7,8 +7,6 @@ pub use core::str::FromStr;
 pub use scale_info::prelude::vec::Vec;
 
 
-
-
 #[cfg(test)]
 mod mock;
 
@@ -70,11 +68,29 @@ pub mod pallet {
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config>  {
 		/// Event documentation should end with an array that provides descriptive names for event
-		DocumentCreated(T::AccountId, u32,Vec<u8>),       // New document has been created
-        DocumentDestroyed(T::AccountId,u32),              // Document destroyed
-        DocumentSigned(T::AccountId,u32,Vec<u8>),         // Document signed
-		NewBlobCreated(T::AccountId,u32,u32),             // new BLOB created
-		BlobDestroyed(T::AccountId,u32,u32),             //  A BLOB has been destroyed
+		DocumentCreated{
+			account: T::AccountId, 
+			documentid: u32,
+			documenthash:Vec<u8>
+		},     // New document has been created
+        DocumentDestroyed{
+			account: T::AccountId,
+			documentid: u32
+		},   // Document destroyed
+        DocumentSigned{
+			account: T::AccountId,
+			documentid: u32,
+			documenthash: Vec<u8>
+		},   // Document signed
+		NewBlobCreated{
+			account: T::AccountId,
+			documentid:u32,chunkid:u32
+		}, 	 // new BLOB created
+		BlobDestroyed{
+			account: T::AccountId,
+			documentid:u32,
+			chunkid:u32
+		},	//  A BLOB has been destroyed
 	}
 
 	// Errors inform users that something went wrong.
@@ -124,7 +140,11 @@ pub mod pallet {
 				// Insert new Document
 				Documents::<T>::insert(sender.clone(),id.clone(),document.clone());
 				// Generate event
-				Self::deposit_event(Event::DocumentCreated(sender,id,document));
+				Self::deposit_event(Event::DocumentCreated{
+					account:sender,
+					documentid: id,
+					documenthash: document
+				});
 				// Return a successful DispatchResult
 				Ok(())
 		  }
@@ -140,7 +160,10 @@ pub mod pallet {
 				Documents::<T>::take(sender.clone(),id.clone());
 				// Generate event
 				//it can leave orphans, anyway it's a decision of the super user
-				Self::deposit_event(Event::DocumentDestroyed(sender,id));
+				Self::deposit_event(Event::DocumentDestroyed{
+					account:sender,
+					documentid: id
+		  		});
 				// Return a successful DispatchResult
 				Ok(())
 		  }
@@ -157,7 +180,11 @@ pub mod pallet {
 				// Insert Signature
 				Signatures::<T>::insert(sender.clone(),id.clone(),hash.clone());
 				// Generate event
-				Self::deposit_event(Event::DocumentSigned(sender,id,hash));
+				Self::deposit_event(Event::DocumentSigned{
+					account:sender,
+					documentid: id,
+					documenthash: hash
+				});
 				// Return a successful DispatchResult
 				Ok(())
 		  }
@@ -183,7 +210,11 @@ pub mod pallet {
 				// Insert the new BLOB chunk (it may be the only one if the file is smaller than 100K)
 				Blobs::<T>::insert(keyarg,blob);
 				// Generate event for the new Blob
-				Self::deposit_event(Event::NewBlobCreated(account,id,chunkid));
+				Self::deposit_event(Event::NewBlobCreated{
+					account: account,
+				    documentid: id,
+					chunkid: chunkid
+		  		});
 				// Return a successful DispatchResult
 				Ok(())
 		  }
@@ -192,20 +223,24 @@ pub mod pallet {
 		  #[pallet::call_index(5)]
 		  #[pallet::weight(T::WeightInfo::destroy_blob())]
 		  pub fn destroy_blob(origin:OriginFor<T>,account: T::AccountId,id:u32,chunkid:u32) -> DispatchResult {
-			  // check the request is signed
-			  let sender = ensure_signed(origin)?;
-			  //check that the matching document is not yet signed
-			  ensure!(!Signatures::<T>::contains_key(&sender,&id),Error::<T>::DocumentAlreadySigned);
-			  // build the tuple to query the nmap
-			  let keyarg=&(sender.clone(),id.clone(),chunkid.clone());
-			  // verify the blob exists and belong to the signer
-			  ensure!(Blobs::<T>::contains_key(keyarg.clone()),Error::<T>::BlobNotFound);
-			  // Remove the blob
-			  Blobs::<T>::take(keyarg);
-			  // Generate event
-			  Self::deposit_event(Event::BlobDestroyed(account,id,chunkid));
-			  // Return a successful DispatchResult
-			  Ok(())
+				// check the request is signed
+				let sender = ensure_signed(origin)?;
+				//check that the matching document is not yet signed
+				ensure!(!Signatures::<T>::contains_key(&sender,&id),Error::<T>::DocumentAlreadySigned);
+				// build the tuple to query the nmap
+				let keyarg=&(sender.clone(),id.clone(),chunkid.clone());
+				// verify the blob exists and belong to the signer
+				ensure!(Blobs::<T>::contains_key(keyarg.clone()),Error::<T>::BlobNotFound);
+				// Remove the blob
+				Blobs::<T>::take(keyarg);
+				// Generate event
+				Self::deposit_event(Event::BlobDestroyed{
+					account:account,
+					documentid: id,
+					chunkid: chunkid
+				});
+				// Return a successful DispatchResult
+				Ok(())
 		  }
 		  
 

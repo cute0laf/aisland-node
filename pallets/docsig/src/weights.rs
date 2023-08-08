@@ -30,7 +30,7 @@
 #![allow(unused_imports)]
 #![allow(missing_docs)]
 
-use frame_support::{traits::Get, weights::Weight};
+use frame_support::{traits::Get, weights::{Weight, constants::RocksDbWeight}};
 use core::marker::PhantomData;
 
 pub trait WeightInfo {
@@ -44,6 +44,7 @@ pub trait WeightInfo {
 //pub struct WeightInfo<T>(PhantomData<T>);
 //impl<T: frame_system::Config> pallet_docsig::WeightInfo for WeightInfo<T> {
 pub struct SubstrateWeight<T>(PhantomData<T>);
+
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 
 	/// Storage: DocSig Documents (r:1 w:1)
@@ -107,5 +108,70 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(Weight::from_parts(0, 13588))
 			.saturating_add(T::DbWeight::get().reads(2))
 			.saturating_add(T::DbWeight::get().writes(1))
+	}
+}
+// For backwards compatibility and tests
+impl WeightInfo for () {
+	/// Storage: DocSig Documents (r:1 w:1)
+	/// Proof Skipped: DocSig Documents (max_values: None, max_size: None, mode: Measured)
+	fn new_document() -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `6`
+		//  Estimated: `3471`
+		// Minimum execution time: 4_000_000 picoseconds.
+		Weight::from_parts(4_000_000, 0)
+			.saturating_add(Weight::from_parts(0, 3471))
+			.saturating_add(RocksDbWeight::get().reads(1))
+			.saturating_add(RocksDbWeight::get().writes(1))
+	}
+	/// Storage: DocSig Documents (r:1 w:1)
+	/// Proof Skipped: DocSig Documents (max_values: None, max_size: None, mode: Measured)
+	fn destroy_document() -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `166`
+		//  Estimated: `3631`
+		// Minimum execution time: 5_000_000 picoseconds.
+		Weight::from_parts(6_000_000, 0)
+			.saturating_add(Weight::from_parts(0, 3631))
+			.saturating_add(RocksDbWeight::get().reads(1))
+			.saturating_add(RocksDbWeight::get().writes(1))
+	}
+	/// Storage: DocSig Signatures (r:1 w:1)
+	/// Proof Skipped: DocSig Signatures (max_values: None, max_size: None, mode: Measured)
+	fn sign_document() -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `6`
+		//  Estimated: `3471`
+		// Minimum execution time: 4_000_000 picoseconds.
+		Weight::from_parts(4_000_000, 0)
+			.saturating_add(Weight::from_parts(0, 3471))
+			.saturating_add(RocksDbWeight::get().reads(1))
+			.saturating_add(RocksDbWeight::get().writes(1))
+	}
+	/// Storage: DocSig Blobs (r:1 w:1)
+	/// Proof Skipped: DocSig Blobs (max_values: None, max_size: None, mode: Measured)
+	fn new_blob() -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `6`
+		//  Estimated: `3471`
+		// Minimum execution time: 4_000_000 picoseconds.
+		Weight::from_parts(5_000_000, 0)
+			.saturating_add(Weight::from_parts(0, 3471))
+			.saturating_add(RocksDbWeight::get().reads(1))
+			.saturating_add(RocksDbWeight::get().writes(1))
+	}
+	/// Storage: DocSig Signatures (r:1 w:0)
+	/// Proof Skipped: DocSig Signatures (max_values: None, max_size: None, mode: Measured)
+	/// Storage: DocSig Blobs (r:1 w:1)
+	/// Proof Skipped: DocSig Blobs (max_values: None, max_size: None, mode: Measured)
+	fn destroy_blob() -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `10123`
+		//  Estimated: `13588`
+		// Minimum execution time: 8_000_000 picoseconds.
+		Weight::from_parts(9_000_000, 0)
+			.saturating_add(Weight::from_parts(0, 13588))
+			.saturating_add(RocksDbWeight::get().reads(2))
+			.saturating_add(RocksDbWeight::get().writes(1))
 	}
 }

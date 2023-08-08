@@ -16,7 +16,7 @@ benchmarks! {
 			let id:u32 = 1u32.into();
 			let caller: T::AccountId = whitelisted_caller();
 			let mut document = Vec::<u8>::new();
-			// with worst scenario with 128 bytes hash length
+			// worst scenario = 128 bytes hash length
 			for _n in 1..128 {
 				document.push(b'x');
 			}
@@ -64,6 +64,7 @@ benchmarks! {
 		let chunkid:u32 = 0u32.into();
 		let caller: T::AccountId = whitelisted_caller();
 		let mut blob = Vec::<u8>::new();
+		//worst scenarion 100,000 bytes blob
 		for _n in 1..100000 {
 			blob.push(b'x');
 		}
@@ -101,6 +102,6 @@ benchmarks! {
 // run test: cargo test -p pallet-docsig --features runtime-benchmarks
 // list: ../target/release/aisland-node benchmark pallet --chain dev --pallet "*" --extrinsic "*" --repeat 0
 // execute benchmarks and save weigthinfo
-// ../target/release/aisland-node benchmark pallet --chain dev --wasm-execution=compiled --pallet "pallet_docsig" --extrinsic "*" --repeat 20  --steps 50 --output testbenc.rs
+// ../target/release/aisland-node benchmark pallet --chain dev --wasm-execution=compiled --pallet "pallet_docsig" --extrinsic "*" --repeat 20  --steps 50 --output docsig/src/weights.rs
 
 
