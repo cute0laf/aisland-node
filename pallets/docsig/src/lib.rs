@@ -173,8 +173,8 @@ pub mod pallet {
 				// check the request is signed
 				let sender = ensure_signed(origin)?;
 				//check  hash length
-				ensure!(hash.len() < 128, Error::<T>::HashTooLong);
-				ensure!(hash.len() > 2, Error::<T>::HashTooShort);
+				ensure!(hash.len() <= 128, Error::<T>::HashTooLong);
+				ensure!(hash.len() >= 32, Error::<T>::HashTooShort);
 				ensure!(id>0,Error::<T>::IdCannotBeZero);
 				ensure!(!Signatures::<T>::contains_key(&sender,&id),Error::<T>::DocumentAlreadySigned);
 				// Insert Signature
@@ -247,9 +247,3 @@ pub mod pallet {
 	}
 	
 }
-
-/*
-https://substrate-developer-hub.github.io/substrate-how-to-guides/docs/basics/basic-tx-weight-calculations/
-
-https://github.com/substrate-developer-hub/substrate-node-template/blob/main/pallets/template/src/weights.rs
-*/
