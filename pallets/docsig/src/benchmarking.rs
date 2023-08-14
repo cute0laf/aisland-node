@@ -57,6 +57,19 @@ benchmarks! {
 		// verification that the signature has been stored
 		assert_eq!(Signatures::<T>::get(caller,1u32),hash);
 	}
+	// store public key benchmark
+	store_publickey {
+		//set the iitial state storing a public key
+		let caller: T::AccountId = whitelisted_caller();
+		let mut publickey = Vec::<u8>::new();
+		for _n in 1..64 {
+			publickey.push(b'0');
+		}
+	}:_(RawOrigin::Signed(caller.clone()), publickey.clone())
+	verify {
+		// verification that the signature has been stored
+		assert_eq!(EncryptionPublicKeys::<T>::get(caller),publickey);
+	}
 	// new blob benchmark
 	new_blob {
 		//set the initial state creating a document

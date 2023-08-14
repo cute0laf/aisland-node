@@ -204,8 +204,9 @@ pub mod pallet {
 				// Return a successful DispatchResult
 				Ok(())
 		  }
+		  // function to store the public key used to encrypt documents
 		  #[pallet::call_index(4)]
-		  #[pallet::weight(T::WeightInfo::sign_document())]
+		  #[pallet::weight(T::WeightInfo::store_publickey())]
 		  pub fn store_publickey(origin:OriginFor<T>,publickey: Vec<u8>) -> DispatchResult {
 				// check the request is signed
 				let sender = ensure_signed(origin)?;

@@ -1,6 +1,6 @@
 use crate::{mock::*, Error, Event};
 use frame_support::{assert_noop, assert_ok};
-use frame_system::RawOrigin;
+//use frame_system::RawOrigin;
 // test new/destroy documents
 #[test]
 fn test_documents(){
@@ -213,6 +213,48 @@ fn test_blob(){
 		assert_noop!(
 			DocSig::destroy_blob(RuntimeOrigin::signed(1),1u64,1u32,chunkid.clone()),
 			Error::<Test>::DocumentAlreadySigned
+		);
+	});
+}
+// test public key storage
+#[test]
+fn test_publickey(){
+	new_test_ext().execute_with(||{
+		// Go past genesis block so events get deposited
+		System::set_block_number(1);
+		let mut publickey = Vec::<u8>::new();
+		// generate a public key
+		for _n in 0..63{
+			publickey.push(b'0');
+		}
+		// store the public key
+		assert_ok!(DocSig::store_publickey(RuntimeOrigin::signed(1),publickey.clone()));
+		// check the event generated for storage of a public key
+		assert_eq!(
+			last_event(),
+			Event::EncryptionPublicKeyStored{ 
+				account:1u64,
+				publickey:publickey.clone(),
+			}.into()
+		);
+		//try to store a 65 bytes public key, it should fail
+		let mut publickeyl = Vec::<u8>::new();
+		// generate an a document longer than 64 bytes
+		for _n in 0..65{
+			publickeyl.push(b'0');
+		}		
+		assert_noop!(
+			DocSig::store_publickey(RuntimeOrigin::signed(1),publickeyl.clone()),
+			Error::<Test>::PublicKeyTooLong
+		);
+
+		//try to store a blob with 1 byte only, it should fail
+		let mut publickeys = Vec::<u8>::new();
+		// generate an a document 1 byte
+		publickeys.push(b'0');
+		assert_noop!(
+			DocSig::store_publickey(RuntimeOrigin::signed(1),publickeys.clone()),
+			Error::<Test>::PublicKeyTooShort
 		);
 	});
 }
