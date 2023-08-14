@@ -63,6 +63,13 @@ pub mod pallet {
     	Vec<u8>,
     	ValueQuery,
 	>;
+
+	// public keys for encryption
+    #[pallet::storage]
+    #[pallet::getter(fn get_encryption_public_key)]
+	pub(super) type EncryptionPublicKeys<T: Config> = StorageMap< _,Blake2_128Concat, T::AccountId,Vec<u8>,ValueQuery>;
+
+
 	// Events definitions
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -91,6 +98,11 @@ pub mod pallet {
 			documentid:u32,
 			chunkid:u32
 		},	//  A BLOB has been destroyed
+		EncryptionPublicKeyStored {
+			account: T::AccountId,
+			publickey:Vec<u8>
+		} // public key for encryption has been stored
+
 	}
 
 	// Errors inform users that something went wrong.
@@ -120,6 +132,10 @@ pub mod pallet {
 		BlobAlreadyPresent,
 		/// The blob is not present on chain
 		BlobNotFound,
+		/// The public key is too short
+		PublicKeyTooShort,
+		/// The public key is too long
+		PublicKeyTooLong
 	}
 
 	// Dispatchable functions allows users to interact with the pallet and invoke state changes.
@@ -188,9 +204,31 @@ pub mod pallet {
 				// Return a successful DispatchResult
 				Ok(())
 		  }
+		  #[pallet::call_index(4)]
+		  #[pallet::weight(T::WeightInfo::sign_document())]
+		  pub fn store_publickey(origin:OriginFor<T>,publickey: Vec<u8>) -> DispatchResult {
+				// check the request is signed
+				let sender = ensure_signed(origin)?;
+				//check  public key length
+				ensure!(publickey.len() <= 64, Error::<T>::PublicKeyTooLong);
+				ensure!(publickey.len() >= 32, Error::<T>::PublicKeyTooShort);
+				// remove the public key if exists already
+				if EncryptionPublicKeys::<T>::contains_key(&sender) {
+					EncryptionPublicKeys::<T>::take(sender.clone());	
+				}
+				//store the public key
+				EncryptionPublicKeys::<T>::insert(sender.clone(),publickey.clone());	
+				// Generate event
+				Self::deposit_event(Event::EncryptionPublicKeyStored{
+					account:sender,
+					publickey: publickey
+				});
+				// Return a successful DispatchResult
+				Ok(())
+		  }
 		  /// Store a BLOB (binary large object) eventually in multiple chunks of 100K bytes
 		  /// the first chunk start from 0 and should increase by 1.
-		  #[pallet::call_index(4)]
+		  #[pallet::call_index(5)]
 		  #[pallet::weight(T::WeightInfo::new_blob())]
 		  pub fn new_blob(origin:OriginFor<T>, account: T::AccountId,id: u32,chunkid: u32,blob: Vec<u8>) -> DispatchResult {
 				// check the request is signed
@@ -220,7 +258,7 @@ pub mod pallet {
 		  }
 		  
 		  /// Destroy a Blob, only the orginal creator can remove it and upon condition is not yet signed
-		  #[pallet::call_index(5)]
+		  #[pallet::call_index(6)]
 		  #[pallet::weight(T::WeightInfo::destroy_blob())]
 		  pub fn destroy_blob(origin:OriginFor<T>,account: T::AccountId,id:u32,chunkid:u32) -> DispatchResult {
 				// check the request is signed
