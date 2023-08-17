@@ -50,6 +50,8 @@ pub use sp_runtime::{Perbill, Permill};
 pub use pallet_marketplace;
 pub use pallet_docsig;
 pub use pallet_citizenship;
+pub use pallet_vote;
+
 
 
 /// An index to a block.
@@ -105,9 +107,9 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	// The version of the runtime specification. A full node will not attempt to use its native
 	//   runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
 	//   `spec_version`, and `authoring_version` are the same between Wasm and native.
-	// This value is set to 100 to notify Polkadot-JS App (https://polkadot.js.org/apps) to use
+	// This value is set to 101 to notify Polkadot-JS App (https://polkadot.js.org/apps) to use
 	//   the compatible custom types.
-	spec_version: 101,
+	spec_version: 102,
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -288,7 +290,11 @@ impl pallet_citizenship::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = pallet_citizenship::weights::SubstrateWeight<Runtime>;
 }
-
+/// Configure the pallet-vote
+impl pallet_vote::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type WeightInfo = pallet_vote::weights::SubstrateWeight<Runtime>;
+}
 
 //configure the utility pallet
 impl pallet_utility::Config for Runtime {
@@ -317,6 +323,7 @@ construct_runtime!(
 		MarketPlace: pallet_marketplace,
 		DocSig: pallet_docsig,
 		Citizenship: pallet_citizenship,
+		Vote: pallet_vote,
 		Utility: pallet_utility,
 		
 	}

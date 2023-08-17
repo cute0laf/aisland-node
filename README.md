@@ -255,8 +255,12 @@ Click on "Settings","Developer" and copy/paste the [data types of this blockchai
 
 
 
+## Unit Tests for Docsig pallet:
 
-
+You can execute the unit test on Docsig pallet, changing folder to "pallets" and running the following command:  
+```
+cargo test -p pallet-docsig --features runtime-benchmarks
+```
 
 
 
