@@ -231,26 +231,26 @@ pub mod pallet {
 		  /// the first chunk start from 0 and should increase by 1.
 		  #[pallet::call_index(5)]
 		  #[pallet::weight(T::WeightInfo::new_blob())]
-		  pub fn new_blob(origin:OriginFor<T>, account: T::AccountId,id: u32,chunkid: u32,blob: Vec<u8>) -> DispatchResult {
+		  pub fn new_blob(origin:OriginFor<T>,id: u32,chunkid: u32,blob: Vec<u8>) -> DispatchResult {
 				// check the request is signed
-				let _sender = ensure_signed(origin)?;
+				let sender = ensure_signed(origin)?;
 				//check blob length
 				ensure!(blob.len() > 1, Error::<T>::BlobTooShort);
 				//the underlying rocksdb has a limit of 3 GB for the value 
 				// the standard max block size in substrate is 4.5 MB, the max for parachain is 2 MB.
-				// 100K should be a reasonable amount for single blob chunk
-				ensure!(blob.len() <= 100000, Error::<T>::BlobTooLong); 
+				// 1MB should be a reasonable amount for single blob chunk
+				ensure!(blob.len() <= 1000000, Error::<T>::BlobTooLong); 
 				// check id that cannot be <1
 				ensure!(id>0,Error::<T>::IdCannotBeZero);
 				// build the tuple to query the nmap
-				let keyarg=&(account.clone(),id.clone(),chunkid.clone());
+				let keyarg=&(sender.clone(),id.clone(),chunkid.clone());
 				//check that the same blob is not already stored
 				ensure!(!Blobs::<T>::contains_key(keyarg.clone()),Error::<T>::BlobAlreadyPresent);
 				// Insert the new BLOB chunk (it may be the only one if the file is smaller than 100K)
 				Blobs::<T>::insert(keyarg,blob);
 				// Generate event for the new Blob
 				Self::deposit_event(Event::NewBlobCreated{
-					account: account,
+					account: sender,
 				    documentid: id,
 					chunkid: chunkid
 		  		});
@@ -261,7 +261,7 @@ pub mod pallet {
 		  /// Destroy a Blob, only the orginal creator can remove it and upon condition is not yet signed
 		  #[pallet::call_index(6)]
 		  #[pallet::weight(T::WeightInfo::destroy_blob())]
-		  pub fn destroy_blob(origin:OriginFor<T>,account: T::AccountId,id:u32,chunkid:u32) -> DispatchResult {
+		  pub fn destroy_blob(origin:OriginFor<T>,id:u32,chunkid:u32) -> DispatchResult {
 				// check the request is signed
 				let sender = ensure_signed(origin)?;
 				//check that the matching document is not yet signed
@@ -274,7 +274,7 @@ pub mod pallet {
 				Blobs::<T>::take(keyarg);
 				// Generate event
 				Self::deposit_event(Event::BlobDestroyed{
-					account:account,
+					account:sender,
 					documentid: id,
 					chunkid: chunkid
 				});

@@ -82,7 +82,7 @@ benchmarks! {
 			blob.push(b'x');
 		}
 		//execute the extrinsic
-	}:_(RawOrigin::Signed(caller.clone()), caller.clone(),id.clone(),chunkid.clone(),blob.clone())
+	}:_(RawOrigin::Signed(caller.clone()),id.clone(),chunkid.clone(),blob.clone())
 	verify {
 		// verification that the blob has been stored
 		let keyarg=(caller,1u32,0u32);
@@ -99,9 +99,9 @@ benchmarks! {
 		for _n in 1..1000 {
 			blob.push(b'x');
 		}
-		let _ = Pallet::<T>::new_blob(RawOrigin::Signed(caller.clone()).into(), caller.clone(),id.clone(),chunkid.clone(),blob.clone());
+		let _ = Pallet::<T>::new_blob(RawOrigin::Signed(caller.clone()).into(), id.clone(),chunkid.clone(),blob.clone());
 		//execute the extrinsic
-	}:_(RawOrigin::Signed(caller.clone()), caller.clone(),id.clone(),chunkid.clone())
+	}:_(RawOrigin::Signed(caller.clone()),id.clone(),chunkid.clone())
 	verify {
 		// verification that the blob has been destroyed
 		let keyarg=(caller,1u32,0u32);

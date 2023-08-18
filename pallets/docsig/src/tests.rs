@@ -139,7 +139,7 @@ fn test_blob(){
 	new_test_ext().execute_with(||{
 		// Go past genesis block so events get deposited
 		System::set_block_number(1);
-		let id:u32 = 1u32.into();
+		let mut id:u32 = 1u32.into();
 		let chunkid:u32 = 0u32.into();
 		let mut document = Vec::<u8>::new();
 		// generate an a document 10000 bytes
@@ -147,7 +147,7 @@ fn test_blob(){
 			document.push(b'x');
 		}
 		// store a new blob
-		assert_ok!(DocSig::new_blob(RuntimeOrigin::signed(1),1u64,id.clone(),chunkid.clone(),document.clone()));
+		assert_ok!(DocSig::new_blob(RuntimeOrigin::signed(1),id.clone(),chunkid.clone(),document.clone()));
 		// check the event generated for new blob
 		assert_eq!(
 			last_event(),
@@ -160,11 +160,12 @@ fn test_blob(){
 		//try to store a blob with 100001 bytes, it should fail
 		let mut documentl = Vec::<u8>::new();
 		// generate an a document 1 byte
-		for _n in 0..100001{
+		for _n in 0..1000001{
 			documentl.push(b'x');
 		}		
+		id= 2u32.into();
 		assert_noop!(
-			DocSig::new_blob(RuntimeOrigin::signed(1),1u64,id.clone(),chunkid.clone(),documentl.clone()),
+			DocSig::new_blob(RuntimeOrigin::signed(1),id.clone(),chunkid.clone(),documentl.clone()),
 			Error::<Test>::BlobTooLong
 		);
 		//try to store a blob with 1 byte only, it should fail
@@ -172,17 +173,17 @@ fn test_blob(){
 		// generate an a document 1 byte
 		documents.push(b'x');
 		assert_noop!(
-			DocSig::new_blob(RuntimeOrigin::signed(1),1u64,id.clone(),chunkid.clone(),documents.clone()),
+			DocSig::new_blob(RuntimeOrigin::signed(1),id.clone(),chunkid.clone(),documents.clone()),
 			Error::<Test>::BlobTooShort
 		);
 		// try to store a document id =0, it should fail
 		assert_noop!(
-			DocSig::new_blob(RuntimeOrigin::signed(1),1u64,0u32,chunkid.clone(),document.clone()),
+			DocSig::new_blob(RuntimeOrigin::signed(1),0u32,chunkid.clone(),document.clone()),
 			Error::<Test>::IdCannotBeZero
 		);
-
+		id= 1u32.into();
 		// delete a blob
-		assert_ok!(DocSig::destroy_blob(RuntimeOrigin::signed(1),1u64,id.clone(),chunkid.clone()));
+		assert_ok!(DocSig::destroy_blob(RuntimeOrigin::signed(1),id.clone(),chunkid.clone()));
 		// check the event generated for destroy blob
 		assert_eq!(
 			last_event(),
@@ -194,7 +195,7 @@ fn test_blob(){
 		);
 		// try to destroy a not existing document , it should fail
 		assert_noop!(
-			DocSig::destroy_blob(RuntimeOrigin::signed(1),100u64,0u32,chunkid.clone()),
+			DocSig::destroy_blob(RuntimeOrigin::signed(1),0u32,chunkid.clone()),
 			Error::<Test>::BlobNotFound
 		);
 		// make a signature on the same document id
@@ -208,10 +209,10 @@ fn test_blob(){
 		//sign document
 		assert_ok!(DocSig::sign_document(RuntimeOrigin::signed(1), id.clone(),documenthash.clone()));
 		//store a blob
-		assert_ok!(DocSig::new_blob(RuntimeOrigin::signed(1),1u64,id.clone(),chunkid.clone(),document.clone()));
+		assert_ok!(DocSig::new_blob(RuntimeOrigin::signed(1),id.clone(),chunkid.clone(),document.clone()));
 		// try to destroy a signed blob it should fail
 		assert_noop!(
-			DocSig::destroy_blob(RuntimeOrigin::signed(1),1u64,1u32,chunkid.clone()),
+			DocSig::destroy_blob(RuntimeOrigin::signed(1),1u32,chunkid.clone()),
 			Error::<Test>::DocumentAlreadySigned
 		);
 	});
