@@ -234,9 +234,9 @@ pub mod pallet {
 			let sender = ensure_signed(origin)?;
 			// check for a valid administrator account
 			ensure!(Administrators::<T>::contains_key(&sender,1),Error::<T>::SignerHasNoAccess);
-			//check naem length
-			ensure!(name.len() < 1, Error::<T>::CountryNameTooShort);
-			ensure!(name.len() > 64, Error::<T>::CountryNameToolong);
+			//check name length
+			ensure!(name.len() > 0, Error::<T>::CountryNameTooShort);
+			ensure!(name.len() < 64, Error::<T>::CountryNameToolong);
 			ensure!(id>0,Error::<T>::IdCannotBeZero);
 			ensure!(!Countries::<T>::contains_key(&id),Error::<T>::CountryAlreadyPresent);
 			// Insert new country
@@ -271,11 +271,12 @@ pub mod pallet {
 			let sender = ensure_signed(origin)?;
 			// check for a valid administrator account
 			ensure!(Administrators::<T>::contains_key(&sender,1),Error::<T>::SignerHasNoAccess);
-			//check naem length
-			ensure!(name.len() < 1, Error::<T>::CountyNameTooShort);
-			ensure!(name.len() > 64, Error::<T>::CountyNameToolong);
+			//check name length
+			ensure!(name.len() > 0, Error::<T>::CountyNameTooShort);
+			ensure!(name.len() < 64, Error::<T>::CountyNameToolong);
 			ensure!(id>0,Error::<T>::IdCannotBeZero);
-			ensure!(!Countries::<T>::contains_key(&id),Error::<T>::CountyAlreadyPresent);
+			ensure!(Countries::<T>::contains_key(&idcountry),Error::<T>::CountryNotFound);
+			ensure!(!Counties::<T>::contains_key(&id,&idcountry),Error::<T>::CountyAlreadyPresent);
 			// Insert new county
 			Counties::<T>::insert(id.clone(),idcountry.clone(),name.clone());
 			// Generate event
@@ -309,8 +310,8 @@ pub mod pallet {
 			// check for a valid administrator account
 			ensure!(Administrators::<T>::contains_key(&sender,1),Error::<T>::SignerHasNoAccess);
 			//check name length
-			ensure!(name.len() < 1, Error::<T>::DistrictNameTooShort);
-			ensure!(name.len() > 64, Error::<T>::DistrictNameToolong);
+			ensure!(name.len() > 0, Error::<T>::DistrictNameTooShort);
+			ensure!(name.len() < 64, Error::<T>::DistrictNameToolong);
 			ensure!(id>0,Error::<T>::IdCannotBeZero);
 			ensure!(!Districts::<T>::contains_key(&id,&idcounty),Error::<T>::DistrictAlreadyPresent);
 			// Insert new District
@@ -346,8 +347,8 @@ pub mod pallet {
 			// check for a valid administrator account
 			ensure!(Administrators::<T>::contains_key(&sender,1),Error::<T>::SignerHasNoAccess);
 			//check name length
-			ensure!(name.len() < 1, Error::<T>::PrecintNameTooShort);
-			ensure!(name.len() > 64, Error::<T>::PrecintNameToolong);
+			ensure!(name.len() > 0, Error::<T>::PrecintNameTooShort);
+			ensure!(name.len() < 64, Error::<T>::PrecintNameToolong);
 			ensure!(id>0,Error::<T>::IdCannotBeZero);
 			ensure!(!Precints::<T>::contains_key(&id,&iddistrict),Error::<T>::PrecintAlreadyPresent);
 			// Insert new Precint
@@ -378,8 +379,10 @@ pub mod pallet {
 		#[pallet::call_index(9)]
 		#[pallet::weight(T::WeightInfo::cause_error())]
 		pub fn new_teller(origin:OriginFor<T>,account: T::AccountId,tellerdata:Vec<u8>) -> DispatchResult {
-			// check the request is signed from root
-			let _sender = ensure_root(origin)?;
+			// check the request is signed
+			let sender = ensure_signed(origin)?;
+			// check for a valid administrator account
+			ensure!(Administrators::<T>::contains_key(&sender,1),Error::<T>::SignerHasNoAccess);
 			// check the same account is not already present
 			ensure!(!Tellers::<T>::contains_key(account.clone()),Error::<T>::TellerAlreadyPresent);
 			// check size of tellerdata field
@@ -420,8 +423,10 @@ pub mod pallet {
 		#[pallet::call_index(10)]
 		#[pallet::weight(T::WeightInfo::cause_error())]
 		pub fn destroy_teller(origin:OriginFor<T>,account: T::AccountId) -> DispatchResult {
-			// check the request is signed from root
-			let _sender = ensure_root(origin)?;
+			// check the request is signed
+			let sender = ensure_signed(origin)?;
+			// check for a valid administrator account
+			ensure!(Administrators::<T>::contains_key(&sender,1),Error::<T>::SignerHasNoAccess);
 			// check is present for the same level
 			ensure!(Tellers::<T>::contains_key(account.clone()),Error::<T>::TellerNotFound);
 			// remove teller
@@ -443,11 +448,15 @@ pub mod pallet {
 		//		dateend
 		// 		url
 		// }
+		// for example:
+		// {"description":"Presidential Elections 2023","countryid":"1","datestart":"2023-10-10","dateend":"2023-10-12","url":"https://necliberia.org"}
 		#[pallet::call_index(11)]
 		#[pallet::weight(T::WeightInfo::cause_error())]
 		pub fn new_session(origin:OriginFor<T>,id: u32,sessiondata:Vec<u8>) -> DispatchResult {
-			// check the request is signed from root
-			let _sender = ensure_root(origin)?;
+			// check the request is signed
+			let sender = ensure_signed(origin)?;
+			// check for a valid administrator account
+			ensure!(Administrators::<T>::contains_key(&sender,1),Error::<T>::SignerHasNoAccess);
 			// check the same session is not already present
 			ensure!(!Sessions::<T>::contains_key(id.clone()),Error::<T>::SessionAlreadyPresent);
 			// check size of sessiondata field
@@ -468,16 +477,16 @@ pub mod pallet {
 			let countryid=json_get_value(sessiondata.clone(),"countryid".as_bytes().to_vec());
 			let countryidu32=vecu8_to_u32(countryid);
 			if countryidu32>0{
-				ensure!(!Countries::<T>::contains_key(&countryidu32),Error::<T>::CountryNotFound);
+				ensure!(Countries::<T>::contains_key(&countryidu32),Error::<T>::CountryNotFound);
 			}
 			if countyidu32>0{
-				ensure!(!Counties::<T>::contains_key(&countyidu32,&countryidu32),Error::<T>::CountyNotFound);
+				ensure!(Counties::<T>::contains_key(&countyidu32,&countryidu32),Error::<T>::CountyNotFound);
 			}
 			if districtidu32>0 {
-				ensure!(!Districts::<T>::contains_key(&districtidu32,&countyidu32),Error::<T>::DistrictNotFound);
+				ensure!(Districts::<T>::contains_key(&districtidu32,&countyidu32),Error::<T>::DistrictNotFound);
 			}
 			if precintidu32>0 {
-				ensure!(!Precints::<T>::contains_key(&precintidu32,&districtidu32),Error::<T>::PrecintNotFound);
+				ensure!(Precints::<T>::contains_key(&precintidu32,&districtidu32),Error::<T>::PrecintNotFound);
 			}
 			// check datestart
 			let datestart=json_get_value(sessiondata.clone(),"datestart".as_bytes().to_vec());
@@ -500,8 +509,10 @@ pub mod pallet {
 		#[pallet::call_index(12)]
 		#[pallet::weight(T::WeightInfo::cause_error())]
 		pub fn destroy_session(origin:OriginFor<T>,id:u32) -> DispatchResult {
-			// check the request is signed from root
-			let _sender = ensure_root(origin)?;
+			// check the request is signed
+			let sender = ensure_signed(origin)?;
+			// check for a valid administrator account
+			ensure!(Administrators::<T>::contains_key(&sender,1),Error::<T>::SignerHasNoAccess);
 			// check the session is present
 			ensure!(Sessions::<T>::contains_key(&id),Error::<T>::SessionIdNotFound);
 			// Remove Session
@@ -521,8 +532,10 @@ pub mod pallet {
 		#[pallet::call_index(13)]
 		#[pallet::weight(T::WeightInfo::cause_error())]
 		pub fn new_candidate(origin:OriginFor<T>,id: u32,candidatedata:Vec<u8>) -> DispatchResult {
-			// check the request is signed from root
-			let _sender = ensure_root(origin)?;
+			// check the request is signed
+			let sender = ensure_signed(origin)?;
+			// check for a valid administrator account
+			ensure!(Administrators::<T>::contains_key(&sender,1),Error::<T>::SignerHasNoAccess);
 			// check the same candidate is not already present
 			ensure!(!Candidates::<T>::contains_key(id.clone()),Error::<T>::CandidateAlreadyPresent);
 			// check size of candidatedata field
@@ -551,8 +564,10 @@ pub mod pallet {
 		#[pallet::call_index(14)]
 		#[pallet::weight(T::WeightInfo::cause_error())]
 		pub fn destroy_candidate(origin:OriginFor<T>,id:u32) -> DispatchResult {
-			// check the request is signed from root
-			let _sender = ensure_root(origin)?;
+			// check the request is signed
+			let sender = ensure_signed(origin)?;
+			// check for a valid administrator account
+			ensure!(Administrators::<T>::contains_key(&sender,1),Error::<T>::SignerHasNoAccess);
 			// check candidate id
 			ensure!(Candidates::<T>::contains_key(id.clone()),Error::<T>::CandidateNotFound);
 			// remove candidate
@@ -641,7 +656,6 @@ pub mod pallet {
 			}
 			//store new votes
 			Votes::<T>::insert(keyarg.clone(),votes);
-	
 			// Generate event
 			Self::deposit_event(Event::VotesUpdated(candidateid,sessionid,districtid,precintid,votes));
 			// Return a successful DispatchResult
