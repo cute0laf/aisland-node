@@ -26,7 +26,7 @@ Aisland Node is based on [Substrate Framework 3.0](https://www.substrate.dev), t
 
 Follow these steps to get started with the Aisland Node:  
 
-- First, complete the [basic Rust setup instructions](./doc/rust-setup.md).
+- First, complete the [basic Rust setup instructions](https://docs.substrate.io/install/).
 
 - Use Rust's native `cargo` command to build and launch the Aisland Node:
 
