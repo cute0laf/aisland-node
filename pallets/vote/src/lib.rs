@@ -529,6 +529,8 @@ pub mod pallet {
 		//		url
 		//		sessionid
 		// }
+		// for example:
+		// {"name":"George Weah","url":"https://necliberia.org","sessionid":"1"}
 		#[pallet::call_index(13)]
 		#[pallet::weight(T::WeightInfo::cause_error())]
 		pub fn new_candidate(origin:OriginFor<T>,id: u32,candidatedata:Vec<u8>) -> DispatchResult {
