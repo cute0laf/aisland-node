@@ -152,9 +152,9 @@ pub mod pallet {
 				ensure!(document.len() >= 32, Error::<T>::DocumentTooShort);
 				ensure!(document.len() <= 128, Error::<T>::DocumentTooLong);
 				ensure!(id>0,Error::<T>::IdCannotBeZero);
-				ensure!(!Documents::<T>::contains_key(&sender,&id),Error::<T>::DocumentAlreadyPresent);
+				ensure!(!Documents::<T>::contains_key(&sender,id),Error::<T>::DocumentAlreadyPresent);
 				// Insert new Document
-				Documents::<T>::insert(sender.clone(),id.clone(),document.clone());
+				Documents::<T>::insert(sender.clone(),id,document.clone());
 				// Generate event
 				Self::deposit_event(Event::DocumentCreated{
 					account:sender,
@@ -171,9 +171,9 @@ pub mod pallet {
 				// check the request is signed
 				let sender = ensure_signed(origin)?;
 				// verify the document exists
-				ensure!(Documents::<T>::contains_key(&sender,&id)==true, Error::<T>::DocumentNotFound);
+				ensure!(Documents::<T>::contains_key(&sender,id), Error::<T>::DocumentNotFound);
 				// Remove Document 
-				Documents::<T>::take(sender.clone(),id.clone());
+				Documents::<T>::take(sender.clone(),id);
 				// Generate event
 				//it can leave orphans, anyway it's a decision of the super user
 				Self::deposit_event(Event::DocumentDestroyed{
@@ -192,9 +192,9 @@ pub mod pallet {
 				ensure!(hash.len() <= 128, Error::<T>::HashTooLong);
 				ensure!(hash.len() >= 32, Error::<T>::HashTooShort);
 				ensure!(id>0,Error::<T>::IdCannotBeZero);
-				ensure!(!Signatures::<T>::contains_key(&sender,&id),Error::<T>::DocumentAlreadySigned);
+				ensure!(!Signatures::<T>::contains_key(&sender,id),Error::<T>::DocumentAlreadySigned);
 				// Insert Signature
-				Signatures::<T>::insert(sender.clone(),id.clone(),hash.clone());
+				Signatures::<T>::insert(sender.clone(),id,hash.clone());
 				// Generate event
 				Self::deposit_event(Event::DocumentSigned{
 					account:sender,
@@ -222,7 +222,7 @@ pub mod pallet {
 				// Generate event
 				Self::deposit_event(Event::EncryptionPublicKeyStored{
 					account:sender,
-					publickey: publickey
+					publickey
 				});
 				// Return a successful DispatchResult
 				Ok(())
@@ -243,7 +243,7 @@ pub mod pallet {
 				// check id that cannot be <1
 				ensure!(id>0,Error::<T>::IdCannotBeZero);
 				// build the tuple to query the nmap
-				let keyarg=&(sender.clone(),id.clone(),chunkid.clone());
+				let keyarg=&(sender.clone(),id,chunkid);
 				//check that the same blob is not already stored
 				ensure!(!Blobs::<T>::contains_key(keyarg.clone()),Error::<T>::BlobAlreadyPresent);
 				// Insert the new BLOB chunk (it may be the only one if the file is smaller than 100K)
@@ -252,7 +252,7 @@ pub mod pallet {
 				Self::deposit_event(Event::NewBlobCreated{
 					account: sender,
 				    documentid: id,
-					chunkid: chunkid
+					chunkid
 		  		});
 				// Return a successful DispatchResult
 				Ok(())
@@ -265,9 +265,9 @@ pub mod pallet {
 				// check the request is signed
 				let sender = ensure_signed(origin)?;
 				//check that the matching document is not yet signed
-				ensure!(!Signatures::<T>::contains_key(&sender,&id),Error::<T>::DocumentAlreadySigned);
+				ensure!(!Signatures::<T>::contains_key(&sender,id),Error::<T>::DocumentAlreadySigned);
 				// build the tuple to query the nmap
-				let keyarg=&(sender.clone(),id.clone(),chunkid.clone());
+				let keyarg=&(sender.clone(),id,chunkid);
 				// verify the blob exists and belong to the signer
 				ensure!(Blobs::<T>::contains_key(keyarg.clone()),Error::<T>::BlobNotFound);
 				// Remove the blob
@@ -276,7 +276,7 @@ pub mod pallet {
 				Self::deposit_event(Event::BlobDestroyed{
 					account:sender,
 					documentid: id,
-					chunkid: chunkid
+					chunkid
 				});
 				// Return a successful DispatchResult
 				Ok(())
