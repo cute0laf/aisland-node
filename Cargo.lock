@@ -783,6 +783,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "771fe0050b883fcc3ea2359b1a96bcfbc090b7116eae7c3c512c7a083fdf23d3"
 
 [[package]]
+name = "bs58"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f5353f36341f7451062466f0b755b96ac3a9547e4d7f6b70d603fc721a7d7896"
+dependencies = [
+ "tinyvec",
+]
+
+[[package]]
 name = "bstr"
 version = "1.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3558,7 +3567,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b6a8fcd392ff67af6cc3f03b1426c41f7f26b6b9aff2dc632c1c56dd649e571f"
 dependencies = [
  "asn1_der",
- "bs58",
+ "bs58 0.4.0",
  "ed25519-dalek 1.0.1",
  "either",
  "fnv",
@@ -3654,7 +3663,7 @@ version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "276bb57e7af15d8f100d3c11cbdd32c6752b7eef4ba7a18ecf464972c07abcce"
 dependencies = [
- "bs58",
+ "bs58 0.4.0",
  "ed25519-dalek 2.0.0",
  "log",
  "multiaddr 0.17.1",
@@ -4783,7 +4792,7 @@ dependencies = [
 name = "pallet-citizenship"
 version = "0.1.1"
 dependencies = [
- "bs58",
+ "bs58 0.5.0",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
@@ -4798,7 +4807,7 @@ dependencies = [
 name = "pallet-docsig"
 version = "0.1.1"
 dependencies = [
- "bs58",
+ "bs58 0.5.0",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
@@ -4836,7 +4845,7 @@ dependencies = [
 name = "pallet-marketplace"
 version = "0.1.1"
 dependencies = [
- "bs58",
+ "bs58 0.5.0",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
@@ -4964,7 +4973,7 @@ dependencies = [
 name = "pallet-vote"
 version = "0.1.1"
 dependencies = [
- "bs58",
+ "bs58 0.4.0",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
@@ -7773,7 +7782,7 @@ dependencies = [
  "bitflags 1.3.2",
  "blake2",
  "bounded-collections",
- "bs58",
+ "bs58 0.4.0",
  "dyn-clonable",
  "ed25519-zebra",
  "futures",
