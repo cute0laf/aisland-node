@@ -36,6 +36,34 @@ The signatures after the the first one, have to call the function:
 - docSig.signDocument(id,hash)
 Where "id" is the unique id of the document and "hash" is the hash of the file signed.
 
+# Unit Tests
+change folder to: pallet/docsig and run:  
+```
+cargo test
+```
+if everything is correct you should see something like this:  
+```
+  Compiling sp-runtime v7.0.0 (https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.42#ff24c60a)
+   Compiling sp-version v5.0.0 (https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.42#ff24c60a)
+   Compiling sp-inherents v4.0.0-dev (https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.42#ff24c60a)
+   Compiling sp-staking v4.0.0-dev (https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.42#ff24c60a)
+   Compiling sp-api v4.0.0-dev (https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.42#ff24c60a)
+   Compiling frame-support v4.0.0-dev (https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.42#ff24c60a)
+   Compiling frame-system v4.0.0-dev (https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.42#ff24c60a)
+   Compiling pallet-docsig v0.1.1 (/Users/samuelelandi_1/src/aisland/aisland-node/pallets/docsig)
+    Finished test [unoptimized + debuginfo] target(s) in 14.42s
+     Running unittests src/lib.rs (/Users/samuelelandi_1/src/aisland/aisland-node/target/debug/deps/pallet_docsig-58519acb322b524f)
+
+running 5 tests
+test mock::__construct_runtime_integrity_test::runtime_integrity_tests ... ok
+test tests::test_publickey ... ok
+test tests::test_signature ... ok
+test tests::test_documents ... ok
+test tests::test_blob ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+```
+
 
 
 
