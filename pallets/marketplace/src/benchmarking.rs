@@ -26,7 +26,7 @@ mod benchmarks {
 		countryname.push(b'n');
 		countryname.push(b'd');
 		#[extrinsic_call]
-		create_iso_country(RawOrigin::Signed(caller), countrycode.clone(),countryname.clone());
+		create_iso_country(RawOrigin::Signed(caller), countrycode.clone(), countryname.clone());
 		//assert_eq!(create_iso_country::<T>::get(), Some(countryname));
 	}
 

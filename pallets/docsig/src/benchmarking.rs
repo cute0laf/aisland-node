@@ -1,18 +1,16 @@
-
-
 //! Benchmarking setup for pallet_docsig
 #![cfg(feature = "runtime-benchmarks")]
 
+#[allow(unused)]
+use crate::Pallet as Docsig;
 use crate::*;
 use frame_benchmarking::{benchmarks, whitelisted_caller};
 use frame_system::RawOrigin;
-#[allow(unused)]
-use crate::Pallet as Docsig;
 
 benchmarks! {
   // benchmarks here
 	new_document {
-			//set the initial state 
+			//set the initial state
 			let id:u32 = 1u32.into();
 			let caller: T::AccountId = whitelisted_caller();
 			let mut document = Vec::<u8>::new();
@@ -88,7 +86,7 @@ benchmarks! {
 		let keyarg=(caller,1u32,0u32);
 		assert_eq!(Blobs::<T>::get(keyarg),blob);
 	}
-	
+
 	// new blob benchmark
 	destroy_blob {
 		//set the initial state creating a document
@@ -107,14 +105,13 @@ benchmarks! {
 		let keyarg=(caller,1u32,0u32);
 		assert_eq!(Blobs::<T>::get(keyarg).len(),0);
 	}
-	
-  	impl_benchmark_test_suite!(Docsig, crate::mock::new_test_ext(), crate::mock::Test);
+
+	  impl_benchmark_test_suite!(Docsig, crate::mock::new_test_ext(), crate::mock::Test);
 }
 // notes for testing and executing benchmarks
 // build node: cargo build --release --features runtime-benchmarks
 // run test: cargo test -p pallet-docsig --features runtime-benchmarks
-// list: ../target/release/aisland-node benchmark pallet --chain dev --pallet "*" --extrinsic "*" --repeat 0
-// execute benchmarks and save weigthinfo
-// ../target/release/aisland-node benchmark pallet --chain dev --wasm-execution=compiled --pallet "pallet_docsig" --extrinsic "*" --repeat 20  --steps 50 --output docsig/src/weights.rs
-
-
+// list: ../target/release/aisland-node benchmark pallet --chain dev --pallet "*" --extrinsic "*"
+// --repeat 0 execute benchmarks and save weigthinfo
+// ../target/release/aisland-node benchmark pallet --chain dev --wasm-execution=compiled --pallet
+// "pallet_docsig" --extrinsic "*" --repeat 20  --steps 50 --output docsig/src/weights.rs
