@@ -23,7 +23,6 @@ use sp_std::prelude::*;
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 
-
 // A few exports that help ease life for downstream crates.
 pub use frame_support::{
 	construct_runtime, parameter_types,
@@ -46,13 +45,11 @@ use pallet_transaction_payment::{ConstFeeMultiplier, CurrencyAdapter, Multiplier
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
+pub use pallet_citizenship;
+pub use pallet_docsig;
 /// Import the market place pallet.
 pub use pallet_marketplace;
-pub use pallet_docsig;
-pub use pallet_citizenship;
 pub use pallet_vote;
-
-
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -273,7 +270,6 @@ impl pallet_sudo::Config for Runtime {
 	type RuntimeCall = RuntimeCall;
 }
 
-
 /// Configure the pallet-marketplace in pallets/marketplace.
 impl pallet_marketplace::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
@@ -298,10 +294,10 @@ impl pallet_vote::Config for Runtime {
 
 //configure the utility pallet
 impl pallet_utility::Config for Runtime {
-  type RuntimeEvent = RuntimeEvent;
-  type RuntimeCall = RuntimeCall;
-  type PalletsOrigin = OriginCaller;
-  type WeightInfo = pallet_utility::weights::SubstrateWeight<Runtime>;
+	type RuntimeEvent = RuntimeEvent;
+	type RuntimeCall = RuntimeCall;
+	type PalletsOrigin = OriginCaller;
+	type WeightInfo = pallet_utility::weights::SubstrateWeight<Runtime>;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -325,7 +321,6 @@ construct_runtime!(
 		Citizenship: pallet_citizenship,
 		Vote: pallet_vote,
 		Utility: pallet_utility,
-		
 	}
 );
 

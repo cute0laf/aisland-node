@@ -2,19 +2,17 @@ use aisland_runtime::{
 	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, Signature, SudoConfig,
 	SystemConfig, WASM_BINARY,
 };
+use hex_literal::hex;
 use sc_service::{ChainType, Properties};
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_consensus_grandpa::AuthorityId as GrandpaId;
-use sp_core::{sr25519, Pair, Public};
+use sp_core::{crypto::UncheckedInto, sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
-use sp_core::crypto::UncheckedInto;
-use hex_literal::hex;
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
 pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig>;
-
 
 /// Generate a crypto pair from seed.
 pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
@@ -93,10 +91,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 			testnet_genesis(
 				wasm_binary,
 				// Initial PoA authorities
-				vec![
-				authority_keys_from_seed("Alice"), 
-				authority_keys_from_seed("Bob"),
-				],
+				vec![authority_keys_from_seed("Alice"), authority_keys_from_seed("Bob")],
 				// Sudo account
 				hex!("001a667f2603ce2cb86703796aff2372c5a78ddeef0ff9b540d9ad745c254447").into(),
 				// Pre-funded accounts
@@ -146,21 +141,26 @@ pub fn public_testnet_config() -> Result<ChainSpec, String> {
 				// Initial PoA authorities (Aura,Grandpa)
 				vec![
 					(
-					 hex!("06c0cf3980869373aef29b4164425eb7371d76cde759dc8f5c68a11eeaf8f57e").unchecked_into(),
-					 hex!("a7ec58dda00f7aeee12c776a29a15f6ea41328ab55e169cbaca7d971e3b2a87b").unchecked_into()
+						hex!("06c0cf3980869373aef29b4164425eb7371d76cde759dc8f5c68a11eeaf8f57e")
+							.unchecked_into(),
+						hex!("a7ec58dda00f7aeee12c776a29a15f6ea41328ab55e169cbaca7d971e3b2a87b")
+							.unchecked_into(),
 					),
-										(
-					 hex!("ea966d82672695cbd3a78a36e08cdc940f0b1085719ed5c5fe58a290fd4ba604").unchecked_into(),
-					 hex!("99b3c75736a01b3657a6802771adf4d64c732c492b9035328a08dee0a87e55a7").unchecked_into()
+					(
+						hex!("ea966d82672695cbd3a78a36e08cdc940f0b1085719ed5c5fe58a290fd4ba604")
+							.unchecked_into(),
+						hex!("99b3c75736a01b3657a6802771adf4d64c732c492b9035328a08dee0a87e55a7")
+							.unchecked_into(),
 					),
-										(
-					 hex!("00a62c03cd3d554dbf48a0cce9bef680f0ac1bc06d4dc8b02868f8d199d0cd63").unchecked_into(),
-					 hex!("85fed304963bedb9232947f30ad39f5357e4842076ebb3275e2bfb72fec56767").unchecked_into()
-					)
+					(
+						hex!("00a62c03cd3d554dbf48a0cce9bef680f0ac1bc06d4dc8b02868f8d199d0cd63")
+							.unchecked_into(),
+						hex!("85fed304963bedb9232947f30ad39f5357e4842076ebb3275e2bfb72fec56767")
+							.unchecked_into(),
+					),
 				],
 				// Sudo account
 				hex!("001a667f2603ce2cb86703796aff2372c5a78ddeef0ff9b540d9ad745c254447").into(),
-
 				// Pre-funded accounts
 				vec![
 					hex!("9ad611a1a67fcf50f16be2650316d3ef976452bc32eaee8caca2da485bf40202").into(),
@@ -194,7 +194,6 @@ pub fn public_testnet_config() -> Result<ChainSpec, String> {
 	))
 }
 
-
 /// Configure initial storage state for FRAME modules.
 fn testnet_genesis(
 	wasm_binary: &[u8],
@@ -223,15 +222,14 @@ fn testnet_genesis(
 			key: Some(root_key),
 		},
 		transaction_payment: Default::default(),
-		
 	}
 }
 
 /// Token
 pub fn aisland_properties() -> Properties {
-    let mut p = Properties::new();
-    p.insert("ss58format".into(), 42.into());
-    p.insert("tokenDecimals".into(), 18.into());
-    p.insert("tokenSymbol".into(), "AISC".into());
-    p
+	let mut p = Properties::new();
+	p.insert("ss58format".into(), 42.into());
+	p.insert("tokenDecimals".into(), 18.into());
+	p.insert("tokenSymbol".into(), "AISC".into());
+	p
 }
